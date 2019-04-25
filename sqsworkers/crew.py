@@ -64,7 +64,6 @@ class Crew():
         self.MessageProcessor = kwargs['MessageProcessor']
         self.name = self.make_name(self.queue_name, self.sqs_resource)
         self.logger = logging.LoggerAdapter(kwargs['logger'], extra={'extra': {'crew.name': self.name}})
-        self.logger.info('1233546565  6757567  324234')
         self.statsd = kwargs['statsd'] if 'statsd' in kwargs else DummyStatsd(self.logger)
         self.sentry = kwargs['sentry'] if 'sentry' in kwargs else None
         self.worker_limit = kwargs['worker_limit'] if 'worker_limit' in kwargs else 10
@@ -140,7 +139,7 @@ class Worker(CrewMember):
         self.logger = logging.LoggerAdapter(self.crew.logger, extra={'extra': {'worker_name': self.worker_name, 'crew.name': self.crew.name}})
         self.logger = self.crew.logger
         self.exception_handler_function = self.crew.exception_handler_function
-        self.logging.info('Completed Worker Initialization')
+        self.logger.info('Completed Worker Initialization')
         CrewMember.__init__(self)
 
     def _wrap_run(self):
@@ -240,7 +239,6 @@ class Worker(CrewMember):
                 entries.clear()
 
         while self.employed:
-            self.logging.info('Reached ln 240 of crew.py')
             messages = self.queue.receive_messages(
                 AttributeNames=['All'],
                 MessageAttributeNames=['All'],
