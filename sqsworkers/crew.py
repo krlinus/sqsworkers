@@ -19,7 +19,7 @@ def log_uncaught_exception(e, logger=None, context=None):
     context['exception_value'] = e
     context['exception_traceback'] = ''.join(traceback.format_tb(e.__traceback__))
 
-    logger.error('Uncaught Exception: %r' % (e), extra={'extra': context})
+    logger.exception('Uncaught Exception: %r' % (e), extra={'extra': context})
 
 
 # dummy class in case statsd obj is not provided
@@ -64,6 +64,7 @@ class Crew():
         self.MessageProcessor = kwargs['MessageProcessor']
         self.name = self.make_name(self.queue_name, self.sqs_resource)
         self.logger = logging.LoggerAdapter(kwargs['logger'], extra={'extra': {'crew.name': self.name}})
+        self.logger.info('1233546565  6757567  324234')
         self.statsd = kwargs['statsd'] if 'statsd' in kwargs else DummyStatsd(self.logger)
         self.sentry = kwargs['sentry'] if 'sentry' in kwargs else None
         self.worker_limit = kwargs['worker_limit'] if 'worker_limit' in kwargs else 10
@@ -75,6 +76,7 @@ class Crew():
         self.exception_handler_function = kwargs['exception_handler'] if 'exception_handler' in kwargs else \
                                           'default_exception_handler'
 
+        self.logger.info('crew inited')
         if not ((self.sqs_session and self.queue_name) or self.sqs_resource):
             raise TypeError('Required arguments not provided. Either provide (sqs_session + queue_name) or sqs_resource.')
 
@@ -256,10 +258,11 @@ class Worker(CrewMember):
                         getattr(self, self.exception_handler_function)(e, message)
                     # continue with the next message and do not delete
                     pass
-                if processed is not None and isinstance(processed, list):
-                    clear_processed(processed, messages)
                 else:
-                    self.logger.info('No actionable status received from Message Processor. Not removing messages from queue')
+                    if processed is not None and isinstance(processed, list):
+                        clear_processed(processed, messages)
+                    else:
+                        self.logger.info('No actionable status received from Message Processor. Not removing messages from queue')
 
     def poll_queue(self):
         if self.bulk_mode:
@@ -278,7 +281,7 @@ class Worker(CrewMember):
             'streamhub_event_type': failed_streamhub_event_type,
             'streamhub_event_schema': failed_streamhub_event_schema
         }
-        self.logger.error('There was an error processing the message %s' % e)
+        self.logger.exception('There was an error processing the message %s' % e)
         self.logger.error(extra_info)
 
     # default exception handler function - this is called by default if no exception handler is specified while instantiating the crew
